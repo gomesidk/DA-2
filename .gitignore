@@ -10,7 +10,7 @@
 # Build output folders
 cmake-build-*/
 build/
-
+cmake-build-debug/*
 # CMake generated files
 CMakeFiles/
 CMakeCache.txt
