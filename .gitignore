@@ -1,0 +1,40 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# Build output folders
+cmake-build-*/
+build/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Compiled object files and binaries
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# CLion specific files (user preferences, caches)
+.idea/
+*.iml
+*.iws
+
+# Backup files
+*~
+*.swp
+*.bak
+
+# Logs
+*.log
