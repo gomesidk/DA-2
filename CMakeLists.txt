@@ -8,4 +8,6 @@ add_executable(untitled2 main.cpp
         menu.h
         data_loader.cpp
         data_loader.h
-        dataset.h)
+        dataset.h
+        algorithms.cpp
+        algorithms.h)

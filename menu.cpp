@@ -3,6 +3,7 @@
 #include <vector>
 #include "dataset.h"
 #include "data_loader.h"
+#include "menu.h"
 using namespace std;
 
 int menu() {

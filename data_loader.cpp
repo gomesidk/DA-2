@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include "dataset.h"
+#include "data_loader.h"
 using namespace std;
 
 vector<Pallet> load_data_pallets(string filename) {
