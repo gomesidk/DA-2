@@ -5,4 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(untitled2 main.cpp
         menu.cpp
-        menu.h)
+        menu.h
+        data_loader.cpp
+        data_loader.h
+        dataset.h)
