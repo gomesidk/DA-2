@@ -4,6 +4,9 @@
 #include <algorithm> // for sort
 #include <iostream>
 #include <ostream>
+#include <ranges>
+
+#include "dataset.h"
 using namespace std;
 
 unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
@@ -115,5 +118,34 @@ unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned 
     return maxValue[n-1][maxWeight];
 }
 
+// Comparator uses floating-point division
+bool compare(const Pallet& a, const Pallet& b) {
+    double r1 = static_cast<double>(a.profit) / a.weight;
+    double r2 = static_cast<double>(b.profit) / b.weight;
+    return r1 > r2;
+}
 
+unsigned int knapsackGreedy(vector<Pallet> pallets, unsigned int n, unsigned int maxWeight, bool usedItems[]) {
+    sort(pallets.begin(), pallets.end(), compare);
+    unsigned int maxValue = 0;
+    unsigned int idx = 0;
+
+    while (maxWeight > 0 && idx < n) {
+        if (pallets[idx].weight <= maxWeight) {  // check if pallet fits
+            maxValue += pallets[idx].profit;
+            maxWeight -= pallets[idx].weight;
+            usedItems[pallets[idx].pallet] = true;
+        }
+        idx++;
+    }
+
+    cout << "Selected pallets IDs:" << endl;
+    for (unsigned int i = 0; i < n; i++) {  // print starting at 0
+        if (usedItems[i]) {
+            cout << i << endl;
+        }
+    }
+
+    return maxValue;
+}
 

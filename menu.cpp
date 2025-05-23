@@ -14,11 +14,19 @@ using namespace std;
 int menu() {
     int choice;
     int dataset;
+    string pallets_filename;
+    string trucks_filename;
     while (true) {
         cout << "Please select the dataset that you would like to use:" << endl;
         cin >> dataset;
-        string pallets_filename = "Pallets_0" + to_string(dataset) + ".csv";
-        string trucks_filename = "TruckAndPallets_0" + to_string(dataset) + ".csv";
+        if (dataset < 10) {
+            pallets_filename = "Pallets_0" + to_string(dataset) + ".csv";
+            trucks_filename = "TruckAndPallets_0" + to_string(dataset) + ".csv";
+        }
+        else {
+            pallets_filename = "Pallets_" + to_string(dataset) + ".csv";
+            trucks_filename = "TruckAndPallets_" + to_string(dataset) + ".csv";
+        }
         vector<Pallet> pallets;
         Truck truck;
         pallets = load_data_pallets(pallets_filename);
@@ -53,8 +61,11 @@ int menu() {
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }
-            case 3:
-            break;
+            case 3: {
+                unsigned int res = knapsackGreedy(pallets, n, maxWeight, usedItems);
+                cout << "\nThe best solution is " << res << endl;
+                break;
+            }
             case 4:
             return 0;
             default:
