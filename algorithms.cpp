@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <algorithm> // for sort
+#include <iostream>
+#include <ostream>
+using namespace std;
 
 unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
     // Static memory allocation is used since it's faster but this assumes there are at most 20 items (n <= 20).
@@ -43,6 +46,11 @@ unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned 
             curCandidate[i] = false;
         }
         curCandidate[curIndex] = true;
+    }
+    for (unsigned int i = 0; i < n; i++) {
+        if(usedItems[i]) {
+            cout << i << endl;
+        }
     }
     return maxValue;
 }
