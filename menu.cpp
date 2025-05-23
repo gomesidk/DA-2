@@ -53,8 +53,11 @@ int menu() {
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }
-            case 3:
-            break;
+            case 3: {
+                unsigned int res = knapsackGreedy(pallets, n, maxWeight, usedItems);
+                cout << "\nThe best solution is " << res << endl;
+                break;
+            }
             case 4:
             return 0;
             default:
