@@ -5,6 +5,6 @@
 #ifndef MENU_H
 #define MENU_H
 
-int menu();
+void menu();
 
 #endif //MENU_H

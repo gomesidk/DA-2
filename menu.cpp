@@ -11,21 +11,32 @@
 #include "algorithms.h"
 using namespace std;
 
-int menu() {
+void menu() {
     int choice;
     int dataset;
     string pallets_filename;
     string trucks_filename;
     while (true) {
+        cout << "Welcome to the menu. If you would like to exit at any time, just press 0." << endl;
         cout << "Please select the dataset that you would like to use:" << endl;
         cin >> dataset;
-        if (dataset < 10) {
-            pallets_filename = "Pallets_0" + to_string(dataset) + ".csv";
-            trucks_filename = "TruckAndPallets_0" + to_string(dataset) + ".csv";
+        if (dataset < 5) {
+            if (dataset == 0) {
+                cout << "exiting..." << endl;
+                break;
+            }
+            pallets_filename = "../datasets/Pallets_0" + to_string(dataset) + ".csv";
+            trucks_filename = "../datasets/TruckAndPallets_0" + to_string(dataset) + ".csv";
         }
         else {
-            pallets_filename = "Pallets_" + to_string(dataset) + ".csv";
-            trucks_filename = "TruckAndPallets_" + to_string(dataset) + ".csv";
+            if (dataset >= 10) {
+                pallets_filename = "../datasets-extra/Pallets_" + to_string(dataset) + ".csv";
+                trucks_filename = "../datasets-extra/TruckAndPallets_" + to_string(dataset) + ".csv";
+            }
+            else {
+                pallets_filename = "../datasets-extra/Pallets_0" + to_string(dataset) + ".csv";
+                trucks_filename = "../datasets-extra/TruckAndPallets_0" + to_string(dataset) + ".csv";
+            }
         }
         vector<Pallet> pallets;
         Truck truck;
@@ -51,6 +62,10 @@ int menu() {
         cout << "Please enter your choice: ";
         cin >> choice;
         switch (choice) {
+            case 0: {
+                cout << "exiting..." << endl;
+                exit(0);
+            }
             case 1: {
                 unsigned int res = knapsackBF(values, weights, n, maxWeight, usedItems);
                 cout << "\nThe best solution is " << res << endl;
@@ -67,11 +82,9 @@ int menu() {
                 break;
             }
             case 4:
-            return 0;
             default:
                 cout << "Invalid choice, please try again." << endl;
         }
     }
 
-    return 0;
 }
