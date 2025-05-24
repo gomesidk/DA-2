@@ -5,8 +5,8 @@
 #include "data_loader.h"
 #include "menu.h"
 
-#include <algorithm>
-#include <bits/ranges_algo.h>
+
+
 
 #include "algorithms.h"
 using namespace std;
