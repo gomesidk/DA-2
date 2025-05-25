@@ -98,41 +98,96 @@ unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned 
  * @param usedItems Output array indicating selected items.
  * @return Maximum value that can be obtained.
  */
-unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
+unsigned int knapsackDP(
+    unsigned int values[],
+    unsigned int weights[],
+    unsigned int n,
+    unsigned int maxWeight,
+    bool usedItems[])
+{
+    // DP arrays
+    // maxValue[i][w]: max value for first i items and capacity w
+    // minCount[i][w]: min number of items for maxValue[i][w]
+    // minSumIDs[i][w]: min sum of pallet IDs for tie breaks
     unsigned int maxValue[100][1000];
+    unsigned int minCount[100][1000];
+    unsigned int minSumIDs[100][1000];
 
-    for(unsigned int k = 0; k <= maxWeight; k++) {
-        maxValue[0][k] = (k >= weights[0]) ? values[0] : 0;
-    }
-    for(unsigned int i = 1; i < n; i++) {
-        maxValue[i][0] = 0;
+    // Initialize for first item
+    for (unsigned int w = 0; w <= maxWeight; w++) {
+        if (w >= weights[0]) {
+            maxValue[0][w] = values[0];
+            minCount[0][w] = 1;
+            minSumIDs[0][w] = 0; // pallet ID = 0 for first item
+        } else {
+            maxValue[0][w] = 0;
+            minCount[0][w] = 0;
+            minSumIDs[0][w] = UINT_MAX; // no items
+        }
     }
 
-    for(unsigned int i = 1; i < n; i++) {
-        for(unsigned int k = 1; k <= maxWeight; k++) {
-            if(k < weights[i]) {
-                maxValue[i][k] = maxValue[i - 1][k];
+    // Fill dp for other items
+    for (unsigned int i = 1; i < n; i++) {
+        for (unsigned int w = 0; w <= maxWeight; w++) {
+            // Option 1: don't take item i
+            unsigned int val1 = maxValue[i - 1][w];
+            unsigned int cnt1 = minCount[i - 1][w];
+            unsigned int sum1 = minSumIDs[i - 1][w];
+
+            if (w < weights[i]) {
+                // Can't take item i
+                maxValue[i][w] = val1;
+                minCount[i][w] = cnt1;
+                minSumIDs[i][w] = sum1;
             } else {
-                unsigned int valUsing = maxValue[i - 1][k - weights[i]] + values[i];
-                maxValue[i][k] = (valUsing > maxValue[i - 1][k]) ? valUsing : maxValue[i - 1][k];
+                unsigned int prevW = w - weights[i];
+                unsigned int val2 = maxValue[i - 1][prevW] + values[i];
+                unsigned int cnt2 = minCount[i - 1][prevW] + 1;
+                unsigned int sum2 = minSumIDs[i - 1][prevW] + i;
+
+                if (val2 > val1 ||
+                    (val2 == val1 && cnt2 < cnt1) ||
+                    (val2 == val1 && cnt2 == cnt1 && sum2 < sum1)) {
+                    maxValue[i][w] = val2;
+                    minCount[i][w] = cnt2;
+                    minSumIDs[i][w] = sum2;
+                } else {
+                    maxValue[i][w] = val1;
+                    minCount[i][w] = cnt1;
+                    minSumIDs[i][w] = sum1;
+                }
             }
         }
     }
 
-    for(unsigned int i = 0; i < n; i++) usedItems[i] = false;
+    // Backtracking
+    for (unsigned int i = 0; i < n; i++) {
+        usedItems[i] = false;
+    }
 
-    unsigned int remainingWeight = maxWeight;
-    for(int i = n - 1; i > 0; i--) {
-        if (remainingWeight == 0) break;
-        if (maxValue[i][remainingWeight] != maxValue[i - 1][remainingWeight]) {
+    unsigned int w = maxWeight;
+    for (int i = n - 1; i > 0; i--) {
+        if (w == 0) break;
+
+        if (maxValue[i][w] != maxValue[i - 1][w] ||
+            minCount[i][w] != minCount[i - 1][w] ||
+            minSumIDs[i][w] != minSumIDs[i - 1][w])
+        {
             usedItems[i] = true;
-            remainingWeight -= weights[i];
+            w -= weights[i];
         }
     }
-    if (remainingWeight >= weights[0]) usedItems[0] = true;
+    // Check first item
+    if (w >= weights[0] && maxValue[0][w] > 0) {
+        usedItems[0] = true;
+    }
 
-    for(unsigned int i = 0; i < n; i++) {
-        if (usedItems[i]) cout << i + 1 << endl;
+    // Print chosen items (1-based indexing)
+    cout << "Selected items (1-based indices):" << endl;
+    for (unsigned int i = 0; i < n; i++) {
+        if (usedItems[i]) {
+            cout << (i + 1) << endl;
+        }
     }
 
     return maxValue[n - 1][maxWeight];
@@ -150,42 +205,94 @@ unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned 
  * @param usedItems Output array indicating selected items.
  * @return Maximum value that can be obtained.
  */
-unsigned int knapsackDP1(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
-    vector maxValue(n, vector<unsigned int>(maxWeight + 1, 0));
 
+unsigned int knapsackDP1(
+    unsigned int values[],
+    unsigned int weights[],
+    unsigned int n,
+    unsigned int maxWeight,
+    bool usedItems[])
+{
+    // DP tables
+    vector<vector<unsigned int>> maxValue(n, vector<unsigned int>(maxWeight + 1, 0));
+    vector<vector<unsigned int>> minCount(n, vector<unsigned int>(maxWeight + 1, UINT_MAX));
+    vector<vector<unsigned int>> minSumIDs(n, vector<unsigned int>(maxWeight + 1, UINT_MAX));
+
+    // Initialize first row
     for (unsigned int k = 0; k <= maxWeight; k++) {
-        maxValue[0][k] = (k >= weights[0]) ? values[0] : 0;
+        if (k >= weights[0]) {
+            maxValue[0][k] = values[0];
+            minCount[0][k] = 1;
+            minSumIDs[0][k] = 0; // pallet id 0 for first item
+        } else {
+            maxValue[0][k] = 0;
+            minCount[0][k] = 0;
+            minSumIDs[0][k] = UINT_MAX;
+        }
     }
 
+    // Initialize minCount for k=0 in other rows
     for (unsigned int i = 1; i < n; i++) {
         maxValue[i][0] = 0;
+        minCount[i][0] = 0;
+        minSumIDs[i][0] = UINT_MAX;
     }
 
+    // Fill DP tables with tie-breaks
     for (unsigned int i = 1; i < n; i++) {
         for (unsigned int k = 1; k <= maxWeight; k++) {
             if (k < weights[i]) {
                 maxValue[i][k] = maxValue[i - 1][k];
+                minCount[i][k] = minCount[i - 1][k];
+                minSumIDs[i][k] = minSumIDs[i - 1][k];
             } else {
                 unsigned int valUsing = maxValue[i - 1][k - weights[i]] + values[i];
-                maxValue[i][k] = (valUsing > maxValue[i - 1][k]) ? valUsing : maxValue[i - 1][k];
+                unsigned int cntUsing = minCount[i - 1][k - weights[i]] + 1;
+                unsigned int sumUsing = minSumIDs[i - 1][k - weights[i]] + i;
+
+                unsigned int valNotUsing = maxValue[i - 1][k];
+                unsigned int cntNotUsing = minCount[i - 1][k];
+                unsigned int sumNotUsing = minSumIDs[i - 1][k];
+
+                // Tie-break logic:
+                if (valUsing > valNotUsing ||
+                    (valUsing == valNotUsing && cntUsing < cntNotUsing) ||
+                    (valUsing == valNotUsing && cntUsing == cntNotUsing && sumUsing < sumNotUsing)) {
+                    maxValue[i][k] = valUsing;
+                    minCount[i][k] = cntUsing;
+                    minSumIDs[i][k] = sumUsing;
+                } else {
+                    maxValue[i][k] = valNotUsing;
+                    minCount[i][k] = cntNotUsing;
+                    minSumIDs[i][k] = sumNotUsing;
+                }
             }
         }
     }
 
-    for (unsigned int i = 0; i < n; i++) usedItems[i] = false;
-
+    // Backtrack to find used items
+    for (unsigned int i = 0; i < n; i++) {
+        usedItems[i] = false;
+    }
     unsigned int remainingWeight = maxWeight;
     for (int i = n - 1; i > 0; i--) {
         if (remainingWeight == 0) break;
-        if (maxValue[i][remainingWeight] != maxValue[i - 1][remainingWeight]) {
+
+        // Check if item i was used by comparing values and tie-break arrays
+        if (maxValue[i][remainingWeight] != maxValue[i - 1][remainingWeight] ||
+            minCount[i][remainingWeight] != minCount[i - 1][remainingWeight] ||
+            minSumIDs[i][remainingWeight] != minSumIDs[i - 1][remainingWeight]) {
             usedItems[i] = true;
             remainingWeight -= weights[i];
         }
     }
-    if (remainingWeight >= weights[0]) usedItems[0] = true;
+    if (remainingWeight >= weights[0] && maxValue[0][remainingWeight] > 0) {
+        usedItems[0] = true;
+    }
 
+    // Print chosen items 1-based
     for (unsigned int i = 0; i < n; i++) {
-        if (usedItems[i]) cout << i + 1 << endl;
+        if (usedItems[i]) cout << (i + 1) << endl;
     }
 
     return maxValue[n - 1][maxWeight];
@@ -253,78 +360,106 @@ unsigned int knapsackGreedy(vector<Pallet> pallets, unsigned int n, unsigned int
  */
 unsigned int knapsackILP(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
     struct Node {
-        int level;
+        unsigned int level;
         unsigned int value;
         unsigned int weight;
-        bool decisions[20];
+        unsigned int decisionsMask;  // bit i = whether item i used
         double bound;
     };
 
-    auto computeBound = [&](Node& node) {
-        unsigned int totalWeight = node.weight;
-        double bound = node.value;
+    // Compute bound for a node given decisions mask
+    auto computeBound = [&](unsigned int level, unsigned int currValue, unsigned int currWeight, unsigned int decisionsMask) -> double {
+        unsigned int totalWeight = currWeight;
+        double bound = (double) currValue;
 
-        for (unsigned int i = node.level; i < n; i++) {
-            if (node.decisions[i]) continue;
+        for (unsigned int i = level; i < n; i++) {
+            if ((decisionsMask & (1U << i)) != 0) continue;
             if (totalWeight + weights[i] <= maxWeight) {
                 totalWeight += weights[i];
                 bound += values[i];
             } else {
-                int remain = maxWeight - totalWeight;
+                unsigned int remain = maxWeight - totalWeight;
                 bound += ((double)values[i] / weights[i]) * remain;
                 break;
             }
         }
-
         return bound;
     };
 
-    Node bestNode = {0, 0, 0, {}, 0.0};
-    for (unsigned int i = 0; i < n; i++) bestNode.decisions[i] = false;
-
+    // Stack of nodes
     vector<Node> stack;
-    Node root = {0, 0, 0, {}, 0.0};
-    root.bound = computeBound(root);
+
+    // Initialize root node
+    Node root = {0, 0, 0, 0, 0.0};
+    root.bound = computeBound(0, 0, 0, 0);
     stack.push_back(root);
+
+    unsigned int bestValue = 0;
+    unsigned int bestNumItems = UINT_MAX;
+    unsigned int bestSumIds = UINT_MAX;
+    unsigned int bestDecisionsMask = 0;
 
     while (!stack.empty()) {
         Node node = stack.back();
         stack.pop_back();
 
         if (node.level == n) {
-            if (node.value > bestNode.value) {
-                bestNode = node;
+            // Count items and sum pallet IDs in decisionsMask
+            unsigned int numItems = 0;
+            unsigned int sumIds = 0;
+            for (unsigned int i = 0; i < n; i++) {
+                if ((node.decisionsMask & (1U << i)) != 0) {
+                    numItems++;
+                    sumIds += i;
+                }
+            }
+
+            if (node.value > bestValue
+                || (node.value == bestValue && numItems < bestNumItems)
+                || (node.value == bestValue && numItems == bestNumItems && sumIds < bestSumIds)) {
+                bestValue = node.value;
+                bestNumItems = numItems;
+                bestSumIds = sumIds;
+                bestDecisionsMask = node.decisionsMask;
             }
             continue;
         }
 
+        // Prune
+        if (node.bound < bestValue) {
+            continue;
+        }
+
+        // Branch 1: Include current item if possible
         if (node.weight + weights[node.level] <= maxWeight) {
-            Node withItem = node;
-            withItem.level++;
-            withItem.weight += weights[node.level];
-            withItem.value += values[node.level];
-            withItem.decisions[node.level] = true;
-            withItem.bound = computeBound(withItem);
-            if (withItem.bound >= bestNode.value) {
+            Node withItem;
+            withItem.level = node.level + 1;
+            withItem.value = node.value + values[node.level];
+            withItem.weight = node.weight + weights[node.level];
+            withItem.decisionsMask = node.decisionsMask | (1U << node.level);
+            withItem.bound = computeBound(withItem.level, withItem.value, withItem.weight, withItem.decisionsMask);
+            if (withItem.bound >= bestValue) {
                 stack.push_back(withItem);
             }
         }
 
-        Node withoutItem = node;
-        withoutItem.level++;
-        withoutItem.decisions[node.level] = false;
-        withoutItem.bound = computeBound(withoutItem);
-        if (withoutItem.bound >= bestNode.value) {
+        // Branch 2: Exclude current item
+        Node withoutItem;
+        withoutItem.level = node.level + 1;
+        withoutItem.value = node.value;
+        withoutItem.weight = node.weight;
+        withoutItem.decisionsMask = node.decisionsMask;
+        withoutItem.bound = computeBound(withoutItem.level, withoutItem.value, withoutItem.weight, withoutItem.decisionsMask);
+        if (withoutItem.bound >= bestValue) {
             stack.push_back(withoutItem);
         }
     }
 
+    // Fill usedItems from bestDecisionsMask
     for (unsigned int i = 0; i < n; i++) {
-        usedItems[i] = bestNode.decisions[i];
-        if (usedItems[i]) {
-            cout << i + 1 << endl;
-        }
+        usedItems[i] = (bestDecisionsMask & (1U << i)) != 0;
+        if (usedItems[i]) cout << i + 1 << endl;
     }
 
-    return bestNode.value;
+    return bestValue;
 }
