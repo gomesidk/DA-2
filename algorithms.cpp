@@ -4,59 +4,83 @@
 #include <algorithm> // for sort
 #include <iostream>
 #include <ostream>
-#include <ranges>
-
+#include "algorithms.h"
 #include "dataset.h"
 using namespace std;
 
 unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
-    // Static memory allocation is used since it's faster but this assumes there are at most 20 items (n <= 20).
-    bool curCandidate[4097]; // current solution candidate being built
-    // Prepare the first candidate
-    for(unsigned int i = 0; i < n; i++) {
+    bool curCandidate[4097];  // current solution candidate being built
+    unsigned int maxValue = 0;  // value of the best solution found so far
+    unsigned int bestNumItems = n + 1; // Initialize to a value greater than the max number of items (n)
+    unsigned int bestSumPallets = UINT_MAX;  // Initialize to a large number
+    bool foundSol = false;
+
+    // Prepare the first candidate (no items selected initially)
+    for (unsigned int i = 0; i < n; i++) {
         curCandidate[i] = false;
     }
+
     // Iterate over all the candidates
-    bool foundSol = false;
-    unsigned int maxValue; // value of the best solution found so far
     while (true) {
-        // Verify if the candidate is a solution
         unsigned int totalValue = 0;
         unsigned int totalWeight = 0;
-        for(unsigned int k = 0; k < n; k++) {
-            totalValue += values[k]*curCandidate[k];
-            totalWeight += weights[k]*curCandidate[k];
+        unsigned int numItems = 0;  // To count the number of items selected in this candidate
+        unsigned int sumPallets = 0;  // To calculate the sum of pallet IDs in this candidate
+
+        // Calculate totalValue, totalWeight, and sum of pallet IDs for the current candidate
+        for (unsigned int k = 0; k < n; k++) {
+            if (curCandidate[k]) {
+                totalValue += values[k];
+                totalWeight += weights[k];
+                numItems++;
+                sumPallets += k;  // Add pallet ID (index) to the sum
+            }
         }
-        if(totalWeight <= maxWeight) {
-            // Check if the solution is better than the previous one (or if it's the first one)
-            if(!foundSol || totalValue > maxValue) {
+
+        // Only consider valid solutions where the total weight doesn't exceed maxWeight
+        if (totalWeight <= maxWeight) {
+            // Compare based on the three criteria:
+            if (!foundSol || totalValue > maxValue ||
+                (totalValue == maxValue && numItems < bestNumItems) ||
+                (totalValue == maxValue && numItems == bestNumItems && sumPallets < bestSumPallets)) {
+
                 foundSol = true;
                 maxValue = totalValue;
-                for(unsigned int k = 0; k < n; k++) {
+                bestNumItems = numItems;
+                bestSumPallets = sumPallets;
+
+                // Save the current candidate as the best solution so far
+                for (unsigned int k = 0; k < n; k++) {
                     usedItems[k] = curCandidate[k];
                 }
             }
         }
 
-        // Get the next candidate
+        // Get the next candidate by incrementing the binary representation
         unsigned int curIndex = 0;
-        while(curCandidate[curIndex]) {
+        while (curCandidate[curIndex]) {
             curIndex++;
-            if(curIndex == n) break;
+            if (curIndex == n) break;
         }
-        if(curIndex == n) break;
-        for(unsigned int i = 0; i < curIndex; i++) {
+        if (curIndex == n) break;
+
+        // Reset all the previous items and move to the next candidate
+        for (unsigned int i = 0; i < curIndex; i++) {
             curCandidate[i] = false;
         }
         curCandidate[curIndex] = true;
     }
+
+    // Output the selected items (pallets)
     for (unsigned int i = 0; i < n; i++) {
-        if(usedItems[i]) {
-            cout << i << endl;
+        if (usedItems[i]) {
+            cout << i << endl;  // Printing the index of the selected pallet
         }
     }
+
     return maxValue;
 }
+
 
 unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
     unsigned int maxValue[100][101]; // assumes maxWeight <= 100 and n <= 100
