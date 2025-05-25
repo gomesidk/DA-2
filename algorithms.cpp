@@ -11,7 +11,7 @@ using namespace std;
 
 unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
     // Static memory allocation is used since it's faster but this assumes there are at most 20 items (n <= 20).
-    bool curCandidate[40]; // current solution candidate being built
+    bool curCandidate[4097]; // current solution candidate being built
     // Prepare the first candidate
     for(unsigned int i = 0; i < n; i++) {
         curCandidate[i] = false;
@@ -149,3 +149,88 @@ unsigned int knapsackGreedy(vector<Pallet> pallets, unsigned int n, unsigned int
     return maxValue;
 }
 
+unsigned int knapsackILP(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
+    struct Node {
+        int level;
+        unsigned int value;
+        unsigned int weight;
+        bool decisions[20];
+        double bound;
+    };
+
+    auto computeBound = [&](Node& node) {
+        unsigned int totalWeight = node.weight;
+        double bound = node.value;
+        for (unsigned int i = node.level; i < n; i++) {
+            if (node.decisions[i]) continue;
+            if (totalWeight + weights[i] <= maxWeight) {
+                totalWeight += weights[i];
+                bound += values[i];
+            } else {
+                int remain = maxWeight - totalWeight;
+                bound += static_cast<double>(values[i]) / weights[i] * remain;
+                break;
+            }
+        }
+        return bound;
+    };
+
+    Node bestNode;
+    bestNode.value = 0;
+    bestNode.weight = 0;
+    bestNode.level = 0;
+    bestNode.bound = 0;
+    for (unsigned int i = 0; i < n; i++) bestNode.decisions[i] = false;
+
+    std::vector<Node> stack;
+    Node root;
+    root.value = 0;
+    root.weight = 0;
+    root.level = 0;
+    for (unsigned int i = 0; i < n; i++) root.decisions[i] = false;
+    root.bound = computeBound(root);
+    stack.push_back(root);
+
+    while (!stack.empty()) {
+        Node node = stack.back();
+        stack.pop_back();
+
+        if (node.level == n) {
+            if (node.value > bestNode.value) {
+                bestNode = node;
+            }
+            continue;
+        }
+
+        // Branch 1: Include item
+        if (node.weight + weights[node.level] <= maxWeight) {
+            Node withItem = node;
+            withItem.level = node.level + 1;
+            withItem.weight += weights[node.level];
+            withItem.value += values[node.level];
+            withItem.decisions[node.level] = true;
+            withItem.bound = computeBound(withItem);
+            if (withItem.bound >= bestNode.value) {
+                stack.push_back(withItem);
+            }
+        }
+
+        // Branch 2: Exclude item
+        Node withoutItem = node;
+        withoutItem.level = node.level + 1;
+        withoutItem.decisions[node.level] = false;
+        withoutItem.bound = computeBound(withoutItem);
+        if (withoutItem.bound >= bestNode.value) {
+            stack.push_back(withoutItem);
+        }
+    }
+
+    for (unsigned int i = 0; i < n; i++) {
+        usedItems[i] = bestNode.decisions[i];
+        if (usedItems[i]) {
+            cout << i << endl;
+        }
+    }
+
+    return bestNode.value;
+}

@@ -82,6 +82,9 @@ void menu() {
                 break;
             }
             case 4:
+                unsigned int res = knapsackILP(values, weights, n, maxWeight, usedItems);
+                cout << "\nThe best solution is " << res << endl;
+                break;
             default:
                 cout << "Invalid choice, please try again." << endl;
         }
