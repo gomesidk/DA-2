@@ -7,6 +7,16 @@
 #include "algorithms.h"
 using namespace std;
 
+/**
+ * @brief Displays the interactive menu to the user to select dataset and algorithm,
+ * loads the data, runs the selected knapsack algorithm, and outputs the result.
+ *
+ * The menu allows the user to choose among multiple datasets and algorithmic
+ * approaches to solve the knapsack problem, including Brute Force, Dynamic Programming,
+ * Approximation (Greedy), and Integer Linear Programming (ILP).
+ *
+ * The function loops until the user chooses to exit by pressing 0.
+ */
 void menu() {
     int choice;
     int dataset;

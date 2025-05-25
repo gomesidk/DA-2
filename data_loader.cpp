@@ -7,6 +7,15 @@
 #include "data_loader.h"
 using namespace std;
 
+/**
+ * @brief Loads pallet data from a CSV file.
+ * 
+ * The CSV file is expected to have a header line, followed by lines
+ * containing pallet ID, profit, and weight, separated by commas.
+ * 
+ * @param filename Path to the CSV file containing pallet data.
+ * @return Vector of Pallet objects loaded from the file.
+ */
 vector<Pallet> load_data_pallets(string filename) {
 
     ifstream file(filename);
@@ -29,16 +38,16 @@ vector<Pallet> load_data_pallets(string filename) {
         string palletid, profit, weight;
 
         // Extract the data by separating based on commas
-        getline(ss, palletid, ',');   // Read Name
-        getline(ss, profit, ','); // Read Age
-        getline(ss, weight, ',');   // Read City
+        getline(ss, palletid, ',');   // Read pallet ID
+        getline(ss, profit, ',');     // Read profit
+        getline(ss, weight, ',');     // Read weight
 
-        // Convert age from string to integer
+        // Convert string values to integers
         int palletid_int = stoi(palletid);
         int profit_int = stoi(profit);
         int weight_int = stoi(weight);
 
-        // Create a Person object and store it in the vector
+        // Create a Pallet object and add it to the vector
         pallets.push_back(Pallet(palletid_int, profit_int, weight_int));
     }
 
@@ -47,6 +56,15 @@ vector<Pallet> load_data_pallets(string filename) {
     return pallets;
 }
 
+/**
+ * @brief Loads truck data from a CSV file.
+ * 
+ * The CSV file is expected to have a header line, followed by a single
+ * line containing truck capacity and number of pallets, separated by commas.
+ * 
+ * @param filename Path to the CSV file containing truck data.
+ * @return Truck object loaded from the file. Returns Truck(0, 0) on error.
+ */
 Truck load_data_trucks(string filename) {
     ifstream file(filename);
     if (!file.is_open()) {
@@ -55,7 +73,7 @@ Truck load_data_trucks(string filename) {
     }
     string line;
     int capacity_int, pallets_int;
-    getline(file, line);
+    getline(file, line); // Skip header
     while (getline(file, line)) {
         stringstream ss(line);
         string capacity, pallets;
