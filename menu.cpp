@@ -4,10 +4,6 @@
 #include "dataset.h"
 #include "data_loader.h"
 #include "menu.h"
-
-
-
-
 #include "algorithms.h"
 using namespace std;
 
@@ -16,6 +12,7 @@ void menu() {
     int dataset;
     string pallets_filename;
     string trucks_filename;
+    unsigned int res = 0;
     while (true) {
         cout << "Welcome to the menu. If you would like to exit at any time, just press 0." << endl;
         cout << "Please select the dataset that you would like to use:" << endl;
@@ -67,22 +64,22 @@ void menu() {
                 exit(0);
             }
             case 1: {
-                unsigned int res = knapsackBF(values, weights, n, maxWeight, usedItems);
+                res = knapsackBF(values, weights, n, maxWeight, usedItems);
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }
             case 2: {
-                unsigned int res = knapsackDP(values, weights, n, maxWeight, usedItems);
+                res = knapsackDP(values, weights, n, maxWeight, usedItems);
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }
             case 3: {
-                unsigned int res = knapsackGreedy(pallets, n, maxWeight, usedItems);
+                res = knapsackGreedy(pallets, n, maxWeight, usedItems);
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }
             case 4:
-                unsigned int res = knapsackILP(values, weights, n, maxWeight, usedItems);
+                res = knapsackILP(values, weights, n, maxWeight, usedItems);
                 cout << "\nThe best solution is " << res << endl;
                 break;
             default:

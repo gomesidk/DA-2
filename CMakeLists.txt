@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(untitled2
         main.cpp
         menu.cpp
-        data_loader.cpp
-        algorithms.cpp
+        data_loader.cpp   # Add this explicitly
+        algorithms.cpp    # Add this explicitly
 )
-
