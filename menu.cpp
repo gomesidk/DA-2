@@ -69,7 +69,11 @@ void menu() {
                 break;
             }
             case 2: {
-                res = knapsackDP(values, weights, n, maxWeight, usedItems);
+                if (maxWeight <= 1000 && n <= 100) {
+                    res = knapsackDP(values, weights, n, maxWeight, usedItems);
+                } else {
+                    res = knapsackDP1(values, weights, n, maxWeight, usedItems);
+                }
                 cout << "\nThe best solution is " << res << endl;
                 break;
             }

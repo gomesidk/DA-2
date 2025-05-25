@@ -85,7 +85,6 @@ unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned 
 unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
     unsigned int maxValue[100][1000]; // example size: maxWeight up to 999; increase as needed
 
-    // Initialize DP matrix
     for(unsigned int k = 0; k <= maxWeight; k++) {
         maxValue[0][k] = (k >= weights[0]) ? values[0] : 0;
     }
@@ -124,6 +123,57 @@ unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned 
     // Print used items
     for(unsigned int i = 0; i < n; i++) {
         if(usedItems[i]) {
+            cout << i + 1 << endl;
+        }
+    }
+
+    return maxValue[n - 1][maxWeight];
+}
+
+unsigned int knapsackDP1(unsigned int values[], unsigned int weights[], unsigned int n, unsigned int maxWeight, bool usedItems[]) {
+    vector maxValue(n, vector<unsigned int>(maxWeight + 1, 0));
+
+    // Initialize first row (base case)
+    for (unsigned int k = 0; k <= maxWeight; k++) {
+        maxValue[0][k] = (k >= weights[0]) ? values[0] : 0;
+    }
+
+    // Initialize first column (capacity=0)
+    for (unsigned int i = 1; i < n; i++) {
+        maxValue[i][0] = 0;
+    }
+
+    // Fill DP matrix
+    for (unsigned int i = 1; i < n; i++) {
+        for (unsigned int k = 1; k <= maxWeight; k++) {
+            if (k < weights[i]) {
+                maxValue[i][k] = maxValue[i - 1][k];
+            } else {
+                unsigned int valUsing = maxValue[i - 1][k - weights[i]] + values[i];
+                maxValue[i][k] = (valUsing > maxValue[i - 1][k]) ? valUsing : maxValue[i - 1][k];
+            }
+        }
+    }
+
+    // Backtrack to find which items to use
+    for (unsigned int i = 0; i < n; i++) {
+        usedItems[i] = false;
+    }
+    unsigned int remainingWeight = maxWeight;
+    for (int i = n - 1; i > 0; i--) {
+        if (remainingWeight == 0) break;
+        if (maxValue[i][remainingWeight] != maxValue[i - 1][remainingWeight]) {
+            usedItems[i] = true;
+            remainingWeight -= weights[i];
+        }
+    }
+    if (remainingWeight >= weights[0]) {
+        usedItems[0] = true;
+    }
+
+    // Print used items (1-based indexing)
+    for (unsigned int i = 0; i < n; i++) {
+        if (usedItems[i]) {
             cout << i + 1 << endl;
         }
     }
