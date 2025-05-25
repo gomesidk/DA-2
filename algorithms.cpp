@@ -74,7 +74,7 @@ unsigned int knapsackBF(unsigned int values[], unsigned int weights[], unsigned 
     // Output the selected items (pallets)
     for (unsigned int i = 0; i < n; i++) {
         if (usedItems[i]) {
-            cout << i << endl;  // Printing the index of the selected pallet
+            cout << i + 1 << endl;  // Printing the index of the selected pallet
         }
     }
 
