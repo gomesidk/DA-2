@@ -135,7 +135,7 @@ unsigned int knapsackDP(unsigned int values[], unsigned int weights[], unsigned 
 
     for(unsigned int i = 1; i < n; i++) {
         if (usedItems[i]) {
-            cout << i << endl;
+            cout << i + 1<< endl;
         }
     }
 
@@ -166,7 +166,7 @@ unsigned int knapsackGreedy(vector<Pallet> pallets, unsigned int n, unsigned int
     cout << "Selected pallets IDs:" << endl;
     for (unsigned int i = 0; i < n; i++) {  // print starting at 0
         if (usedItems[i]) {
-            cout << i << endl;
+            cout << i + 1 << endl;
         }
     }
 
@@ -252,7 +252,7 @@ unsigned int knapsackILP(unsigned int values[], unsigned int weights[], unsigned
     for (unsigned int i = 0; i < n; i++) {
         usedItems[i] = bestNode.decisions[i];
         if (usedItems[i]) {
-            cout << i << endl;
+            cout << i + 1 << endl;
         }
     }
 
